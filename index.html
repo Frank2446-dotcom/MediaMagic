@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediaMagic - Your Entertainment Hub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="title-section">
+            <div class="title">
+                <h1>MediaMagic</h1>
+            </div>
+            <div class="user-account">
+                <button onclick="login()">Login</button>
+                <button onclick="signup()">Sign Up</button>
+            </div>
+        </div>
+        <div class="navbar">
+            <nav class="nav-links" id="nav-links">
+                <a href="#home">Home</a>
+                <a href="#recognition">Recognition</a>
+                <a href="#upload">Upload</a>
+                <a href="#account">Account</a>
+                <a href="#all">All</a>
+                <a href="#record">Record</a>
+                <a href="#music">Music</a>
+                <a href="#video">Video</a>
+                <a href="#animation">Animation</a>
+                <div class="search-bar">
+                    <input type="text" id="search-input" placeholder="Search for music or movies...">
+                    <button onclick="search()">Search</button>
+                </div>
+            </nav>
+            <div class="hamburger-menu" onclick="toggleMenu()">☰</div>
+        </div>
+    </header>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <section id="home">
+        <div class="container">
+            <h2>Trending Now</h2>
+            <div class="video-grid" id="video-grid">
+                <div class="video-item" onclick="playVideo('ScMzIvxBSi4', 'video/mp4')">
+                    <img src="https://img.youtube.com/vi/ScMzIvxBSi4/mqdefault.jpg" alt="Sample Video 1">
+                    <p>Sample Video 1</p>
+                </div>
+                <div class="video-item" onclick="playVideo('e-ORhEE9VVg', 'video/mp4')">
+                    <img src="https://img.youtube.com/vi/e-ORhEE9VVg/mqdefault.jpg" alt="Sample Video 2">
+                    <p>Sample Video 2</p>
+                </div>
+                <div class="video-item" onclick="playVideo('9bZkp7q19f0', 'video/mp4')">
+                    <img src="https://img.youtube.com/vi/9bZkp7q19f0/mqdefault.jpg" alt="Sample Video 3">
+                    <p>Sample Video 3</p>
+                </div>
+                <div class="video-item" onclick="playVideo('OPf0YbXqDm0', 'video/mp4')">
+                    <img src="https://img.youtube.com/vi/OPf0YbXqDm0/mqdefault.jpg" alt="Sample Video 4">
+                    <p>Sample Video 4</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="recognition" class="recognition-section">
+        <h2>Audio and Video Recognition</h2>
+        <div class="container">            
+            <div class="bubble-container">
+                <div class="bubble">
+                    <p id="listening" class="listening-text hidden">Listening...!</p>
+                    <button id="start-listening-btn" onclick="startListening()">Start Listening</button>
+                </div>
+            </div>
+            <p id="recognition-status">Click to start listening...</p>
+            <div id="search-results" class="search-results hidden">
+                <h3 id="results-title"></h3>
+                <ul id="results-list">
+                    <!-- Search results will be appended here -->
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="upload">
+        <div class="container">
+            <h2>Upload Your Files</h2>
+            <div class="upload-section">
+                <input type="file" id="file-upload" accept="audio/*,video/*" multiple onchange="uploadFiles()">
+                <label for="file-upload" class="upload-button">Upload a File</label>
+                <p id="upload-status">Choose files to upload...</p>
+            </div>
+            <div id="file-list" class="file-list">
+                <!-- Uploaded files will be displayed here -->
+            </div>
+            <section id="playback" class="hidden">
+                <h2>Playback and Settings</h2>
+                <div id="media-content"></div>
+                <div id="media-controls">
+                    <button id="play-button" onclick="togglePlay()">Play</button>
+                    <button id="generate-lyrics-button" onclick="generateLyrics()">Generate Lyrics</button>
+                    <button id="generate-captions-button" onclick="generateCaptions()">Generate Captions</button>
+                </div>
+                <div id="settings">
+                    <label for="volume">Volume:</label>
+                    <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5" onchange="setVolume()">
+                    <label for="speed">Speed:</label>
+                    <select id="speed" onchange="setSpeed()">
+                        <option value="1">Normal</option>
+                        <option value="0.5">0.5x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2">2x</option>
+                    </select>
+                </div>
+            </section>
+        </div>
+    </section>
+    
+    <!-- Stream Popup -->
+    <div id="stream-popup" class="hidden">
+        <div id="stream-content"></div>
+    </div>
+    
+       
+    <section id="record">
+        <div class="container">
+            <h2>Record Your Audio or Video</h2>
+    
+            <!-- Audio Recording Controls -->
+            <div class="recording-controls">
+                <button id="startAudio" onclick="startAudioRecording()">
+                    <i class="fas fa-microphone-alt"></i> Start Audio
+                </button>
+                <button id="stopAudio" onclick="stopAudioRecording()" disabled>
+                    <i class="fas fa-stop"></i> Stop Audio
+                </button>
+                <button id="pauseResumeAudio" onclick="pauseResumeAudioRecording()" disabled>
+                    <i class="fas fa-pause"></i> Pause Audio
+                </button>
+                <span id="audio-timer">00:00:00</span>
+            </div>
+    
+            <!-- Video Recording Controls -->
+            <div class="recording-controls">
+                <button id="startVideo" onclick="startVideoRecording()">
+                    <i class="fas fa-video"></i> Start Video
+                </button>
+                <button id="stopVideo" onclick="stopVideoRecording()" disabled>
+                    <i class="fas fa-stop"></i> Stop Video
+                </button>
+                <button id="pauseResumeVideo" onclick="pauseResumeVideoRecording()" disabled>
+                    <i class="fas fa-pause"></i> Pause Video
+                </button>
+                <span id="video-timer">00:00:00</span>
+            </div>
+    
+            <!-- Video Stream Container -->
+            <div class="video-stream">
+                <video id="camera-stream" autoplay></video>
+            </div>
+    
+            <!-- Recording Status -->
+            <p id="recording-status">Click icons to start recording...</p>
+    
+            <!-- Recordings List -->
+            <div id="recordings-list"></div>
+        </div>
+    </section>
+    
+    
+    
+    
+
+    
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 MediaMagic. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <div id="error-message" class="hidden">
+        <p>No microphone detected</p>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>
