@@ -6,6 +6,8 @@
     <title>MediaMagic - Your Entertainment Hub</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://www.youtube.com/iframe_api"></script>
+
 </head>
 <body>
     <header>
@@ -130,13 +132,13 @@
             <!-- Audio Recording Controls -->
             <div class="recording-controls">
                 <button id="startAudio" onclick="startAudioRecording()">
-                    <i class="fas fa-microphone-alt"></i> Start Audio
+                    <i class="fas fa-microphone-alt"></i>
                 </button>
                 <button id="stopAudio" onclick="stopAudioRecording()" disabled>
-                    <i class="fas fa-stop"></i> Stop Audio
+                    <i class="fas fa-stop"></i>
                 </button>
                 <button id="pauseResumeAudio" onclick="pauseResumeAudioRecording()" disabled>
-                    <i class="fas fa-pause"></i> Pause Audio
+                    <i class="fas fa-pause"></i>
                 </button>
                 <span id="audio-timer">00:00:00</span>
             </div>
@@ -144,13 +146,13 @@
             <!-- Video Recording Controls -->
             <div class="recording-controls">
                 <button id="startVideo" onclick="startVideoRecording()">
-                    <i class="fas fa-video"></i> Start Video
+                    <i class="fas fa-video"></i>
                 </button>
                 <button id="stopVideo" onclick="stopVideoRecording()" disabled>
-                    <i class="fas fa-stop"></i> Stop Video
+                    <i class="fas fa-stop"></i>
                 </button>
                 <button id="pauseResumeVideo" onclick="pauseResumeVideoRecording()" disabled>
-                    <i class="fas fa-pause"></i> Pause Video
+                    <i class="fas fa-pause"></i>
                 </button>
                 <span id="video-timer">00:00:00</span>
             </div>
@@ -167,8 +169,95 @@
             <div id="recordings-list"></div>
         </div>
     </section>
+
+
+
+
+
+
+
+
+
+
+
+
+    <section id="musicSection">
+        <div class="music-container">
+            <h2>Music Categories</h2>
+            <div class="categories">
+                <button class="category-button" data-category="recentlyPlayed">Recently Played</button>
+                <button class="category-button" data-category="bongo">Bongo</button>
+                <button class="category-button" data-category="hiphop">Hipop</button>
+                <button class="category-button" data-category="rnb">RnB</button>
+                <button class="category-button" data-category="gospel">Gospel</button>
+                <button class="category-button" data-category="live">Live</button>
+                <button class="category-button" data-category="dancehall">Dancehall</button>
+                <button class="category-button" data-category="reggae">Reggae</button>
+                <button class="category-button" data-category="afrobeats">Afrobeats</button>
+                <button class="category-button" data-category="countryMusic">Country Music</button>
+                <button class="category-button" data-category="riddim">Riddim</button>
+                <button class="category-button" data-category="mixes">Mixes</button>
+            </div>
+        </div>
+    
+        <div id="musicList" class="music-list hidden">
+            <!-- Music items will be dynamically added here -->
+        </div>
+    
+        <div id="musicPlayerContainer" class="music-player-container hidden">
+            <div id="musicPlayerControls" class="music-player-controls">
+                <button id="previousButton" class="control-button" title="Previous">
+                    <i class="fas fa-step-backward"></i>
+                </button>
+                <button id="playButton" class="control-button" title="Play">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button id="pauseButton" class="control-button" title="Pause">
+                    <i class="fas fa-pause"></i>
+                </button>
+                <button id="stopButton" class="control-button" title="Stop">
+                    <i class="fas fa-stop"></i>
+                </button>
+                <button id="nextButton" class="control-button" title="Next">
+                    <i class="fas fa-step-forward"></i>
+                </button>
+                <button id="closeButton" class="control-button close-button" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+                <select id="qualitySelect" class="music-settings hidden">
+                    <option value="low">Low Quality</option>
+                    <option value="medium">Medium Quality</option>
+                    <option value="high">High Quality</option>
+                </select>
+                <button id="downloadButton" class="control-button download-button" title="Download">
+                    <i class="fas fa-download"></i>
+                </button>
+            </div>
+            <div id="musicPlayerWrapper" class="music-player-wrapper">
+                <iframe id="musicPlayer" class="music-player" frameborder="0" allowfullscreen></iframe>
+            </div>
+        </div>
+        
+    </section>
     
     
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+
     
     
 
@@ -185,5 +274,7 @@
     </div>
 
     <script src="scripts.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+
 </body>
 </html>

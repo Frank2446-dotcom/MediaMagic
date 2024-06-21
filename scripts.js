@@ -94,7 +94,7 @@ function playVideo(videoId, type) {
 
 
 
-
+//SECTION UPLOAD FILES
 
 let filesArray = []; // Array to store uploaded files
 
@@ -245,247 +245,394 @@ function setSpeed() {
 
 
 
+// SECTION RECORD
 
+document.addEventListener("DOMContentLoaded", function () {
+    let audioRecorder;
+    let audioChunks = [];
+    let audioStartTime;
+    let audioTimerInterval;
 
+    let videoRecorder;
+    let videoChunks = [];
+    let videoStartTime;
+    let videoTimerInterval;
+    let cameraStream;
 
-let audioRecorder;
-let audioChunks = [];
-let audioStartTime;
-let audioTimerInterval;
+    function startAudioRecording() {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function (stream) {
+                audioRecorder = new MediaRecorder(stream);
+                audioChunks = [];
 
-let videoRecorder;
-let videoChunks = [];
-let videoStartTime;
-let videoTimerInterval;
-let cameraStream;
+                audioRecorder.ondataavailable = function (e) {
+                    audioChunks.push(e.data);
+                };
 
-// Function to start audio recording
-function startAudioRecording() {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(function(stream) {
-            audioRecorder = new MediaRecorder(stream);
-            audioChunks = [];
+                audioRecorder.start();
+                audioStartTime = Date.now();
+                updateAudioTimer();
 
-            audioRecorder.ondataavailable = function(e) {
-                audioChunks.push(e.data);
-            };
+                document.getElementById('startAudio').disabled = true;
+                document.getElementById('stopAudio').disabled = false;
+                document.getElementById('pauseResumeAudio').disabled = false;
+                document.getElementById('recording-status').innerText = 'Recording audio...';
+            })
+            .catch(function (err) {
+                console.error('Error starting audio recording: ' + err);
+            });
+    }
 
-            audioRecorder.start();
-            audioStartTime = Date.now();
-            updateAudioTimer();
+    function stopAudioRecording() {
+        audioRecorder.stop();
+        clearInterval(audioTimerInterval);
+        document.getElementById('startAudio').disabled = false;
+        document.getElementById('stopAudio').disabled = true;
+        document.getElementById('pauseResumeAudio').disabled = true;
+        document.getElementById('recording-status').innerText = 'Audio recording stopped.';
 
-            document.getElementById('startAudio').disabled = true;
-            document.getElementById('stopAudio').disabled = false;
-            document.getElementById('pauseResumeAudio').disabled = false;
+        saveRecording('audio');
+    }
+
+    function pauseResumeAudioRecording() {
+        if (audioRecorder.state === 'recording') {
+            audioRecorder.pause();
+            document.getElementById('pauseResumeAudio').innerHTML = '<i class="fas fa-play"></i>';
+            document.getElementById('recording-status').innerText = 'Audio recording paused.';
+        } else if (audioRecorder.state === 'paused') {
+            audioRecorder.resume();
+            document.getElementById('pauseResumeAudio').innerHTML = '<i class="fas fa-pause"></i>';
             document.getElementById('recording-status').innerText = 'Recording audio...';
-        })
-        .catch(function(err) {
-            console.error('Error starting audio recording: ' + err);
-        });
-}
-
-// Function to stop audio recording
-function stopAudioRecording() {
-    audioRecorder.stop();
-    clearInterval(audioTimerInterval);
-    document.getElementById('startAudio').disabled = false;
-    document.getElementById('stopAudio').disabled = true;
-    document.getElementById('pauseResumeAudio').disabled = true;
-    document.getElementById('recording-status').innerText = 'Audio recording stopped.';
-
-    saveRecording('audio');
-}
-
-// Function to pause/resume audio recording
-function pauseResumeAudioRecording() {
-    if (audioRecorder.state === 'recording') {
-        audioRecorder.pause();
-        document.getElementById('pauseResumeAudio').innerHTML = '<i class="fas fa-play"></i> Resume Audio';
-        document.getElementById('recording-status').innerText = 'Audio recording paused.';
-    } else if (audioRecorder.state === 'paused') {
-        audioRecorder.resume();
-        document.getElementById('pauseResumeAudio').innerHTML = '<i class="fas fa-pause"></i> Pause Audio';
-        document.getElementById('recording-status').innerText = 'Recording audio...';
-    }
-}
-
-// Function to update audio timer
-function updateAudioTimer() {
-    audioTimerInterval = setInterval(function() {
-        const elapsedTime = new Date(Date.now() - audioStartTime);
-        const hours = elapsedTime.getUTCHours().toString().padStart(2, '0');
-        const minutes = elapsedTime.getUTCMinutes().toString().padStart(2, '0');
-        const seconds = elapsedTime.getUTCSeconds().toString().padStart(2, '0');
-        document.getElementById('audio-timer').innerText = `${hours}:${minutes}:${seconds}`;
-    }, 1000);
-}
-
-// Function to start video recording
-function startVideoRecording() {
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(function(stream) {
-            videoRecorder = new MediaRecorder(stream);
-            videoChunks = [];
-            cameraStream = stream;
-
-            videoRecorder.ondataavailable = function(e) {
-                videoChunks.push(e.data);
-            };
-
-            videoRecorder.start();
-            videoStartTime = Date.now();
-            updateVideoTimer();
-
-            document.getElementById('startVideo').disabled = true;
-            document.getElementById('stopVideo').disabled = false;
-            document.getElementById('pauseResumeVideo').disabled = false;
-            document.getElementById('recording-status').innerText = 'Recording video...';
-
-            // Display camera stream
-            const videoElement = document.getElementById('camera-stream');
-            videoElement.srcObject = stream;
-            videoElement.play();
-        })
-        .catch(function(err) {
-            console.error('Error starting video recording: ' + err);
-            document.getElementById('recording-status').innerText = 'Camera not available. Recording audio only...';
-            startAudioRecording(); // Start audio recording if video recording fails
-        });
-}
-
-// Function to stop video recording
-function stopVideoRecording() {
-    videoRecorder.stop();
-    clearInterval(videoTimerInterval);
-    document.getElementById('startVideo').disabled = false;
-    document.getElementById('stopVideo').disabled = true;
-    document.getElementById('pauseResumeVideo').disabled = true;
-    document.getElementById('recording-status').innerText = 'Video recording stopped.';
-
-    saveRecording('video');
-}
-
-// Function to pause/resume video recording
-function pauseResumeVideoRecording() {
-    if (videoRecorder.state === 'recording') {
-        videoRecorder.pause();
-        document.getElementById('pauseResumeVideo').innerHTML = '<i class="fas fa-play"></i> Resume Video';
-        document.getElementById('recording-status').innerText = 'Video recording paused.';
-    } else if (videoRecorder.state === 'paused') {
-        videoRecorder.resume();
-        document.getElementById('pauseResumeVideo').innerHTML = '<i class="fas fa-pause"></i> Pause Video';
-        document.getElementById('recording-status').innerText = 'Recording video...';
-    }
-}
-
-// Function to save recording
-function saveRecording(type) {
-    let blob;
-    let fileName = `${type}_${Date.now()}.${type === 'audio' ? 'webm' : 'mp4'}`;
-
-    if (type === 'audio') {
-        blob = new Blob(audioChunks, { type: 'audio/webm' });
-    } else if (type === 'video') {
-        blob = new Blob(videoChunks, { type: 'video/mp4' });
-    }
-
-    const url = URL.createObjectURL(blob);
-
-    const listItem = document.createElement('div');
-    listItem.classList.add('record-item');
-
-    listItem.innerHTML = `
-        <video src="${url}" controls></video>
-        <div class="details">
-            <h3>${fileName}</h3>
-            <p>Length: ${formatDuration(blob)}</p>
-        </div>
-        <div class="controls">
-            <button onclick="playRecording('${url}')"><i class="fas fa-play"></i></button>
-            <button onclick="pauseRecording('${url}')"><i class="fas fa-pause"></i></button>
-            <button onclick="stopRecording('${url}')"><i class="fas fa-stop"></i></button>
-        </div>
-    `;
-
-    document.getElementById('recordings-list').appendChild(listItem);
-}
-
-// Function to play recording
-function playRecording(url) {
-    const recordings = document.querySelectorAll('video');
-    recordings.forEach(function(recording) {
-        recording.pause();
-    });
-
-    const video = document.createElement('video');
-    video.src = url;
-    video.controls = true;
-    video.autoplay = true;
-
-    const modal = document.createElement('div');
-    modal.classList.add('modal');
-    modal.appendChild(video);
-
-    document.body.appendChild(modal);
-}
-
-// Function to pause recording
-function pauseRecording(url) {
-    const recordings = document.querySelectorAll('video');
-    recordings.forEach(function(recording) {
-        if (recording.src === url) {
-            recording.pause();
         }
-    });
-}
+    }
 
-// Function to stop recording
-function stopRecording(url) {
-    const recordings = document.querySelectorAll('video');
-    recordings.forEach(function(recording) {
-        if (recording.src === url) {
+    function updateAudioTimer() {
+        audioTimerInterval = setInterval(() => {
+            const elapsed = Date.now() - audioStartTime;
+            document.getElementById('audio-timer').innerText = formatTime(elapsed);
+        }, 1000);
+    }
+
+    function startVideoRecording() {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(function (stream) {
+                cameraStream = stream;
+                const cameraVideo = document.getElementById('camera-stream');
+                cameraVideo.srcObject = stream;
+
+                videoRecorder = new MediaRecorder(stream);
+                videoChunks = [];
+
+                videoRecorder.ondataavailable = function (e) {
+                    videoChunks.push(e.data);
+                };
+
+                videoRecorder.start();
+                videoStartTime = Date.now();
+                updateVideoTimer();
+
+                document.getElementById('startVideo').disabled = true;
+                document.getElementById('stopVideo').disabled = false;
+                document.getElementById('pauseResumeVideo').disabled = false;
+                document.getElementById('recording-status').innerText = 'Recording video...';
+            })
+            .catch(function (err) {
+                console.error('Error starting video recording: ' + err);
+                document.getElementById('recording-status').innerText = 'Camera not available. Recording audio only...';
+                startAudioRecording(); // Start audio recording if video recording fails
+            });
+    }
+
+    function stopVideoRecording() {
+        videoRecorder.stop();
+        cameraStream.getTracks().forEach(track => track.stop());
+        clearInterval(videoTimerInterval);
+        document.getElementById('startVideo').disabled = false;
+        document.getElementById('stopVideo').disabled = true;
+        document.getElementById('pauseResumeVideo').disabled = true;
+        document.getElementById('recording-status').innerText = 'Video recording stopped.';
+
+        saveRecording('video');
+    }
+
+    function pauseResumeVideoRecording() {
+        if (videoRecorder.state === 'recording') {
+            videoRecorder.pause();
+            document.getElementById('pauseResumeVideo').innerHTML = '<i class="fas fa-play"></i>';
+            document.getElementById('recording-status').innerText = 'Video recording paused.';
+        } else if (videoRecorder.state === 'paused') {
+            videoRecorder.resume();
+            document.getElementById('pauseResumeVideo').innerHTML = '<i class="fas fa-pause"></i>';
+            document.getElementById('recording-status').innerText = 'Recording video...';
+        }
+    }
+
+    function updateVideoTimer() {
+        videoTimerInterval = setInterval(() => {
+            const elapsed = Date.now() - videoStartTime;
+            document.getElementById('video-timer').innerText = formatTime(elapsed);
+        }, 1000);
+    }
+
+    function formatTime(ms) {
+        const totalSeconds = Math.floor(ms / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+    }
+
+    function pad(num) {
+        return num.toString().padStart(2, '0');
+    }
+
+    function saveRecording(type) {
+        let blob;
+        let fileName = `${type}_${Date.now()}.${type === 'audio' ? 'webm' : 'mp4'}`;
+
+        if (type === 'audio') {
+            blob = new Blob(audioChunks, { type: 'audio/webm' });
+        } else if (type === 'video') {
+            blob = new Blob(videoChunks, { type: 'video/mp4' });
+        }
+
+        const url = URL.createObjectURL(blob);
+
+        const listItem = document.createElement('div');
+        listItem.classList.add('record-item');
+
+        listItem.innerHTML = `
+            ${type === 'video' ? `<video src="${url}" controls></video>` : ''}
+            <div class="details">
+                <h3>${fileName}</h3>
+                <p>Length: ${formatTime(blob.size / 1000)}</p>
+            </div>
+            <div class="controls">
+                <button onclick="playRecording('${url}')"><i class="fas fa-play"></i></button>
+                <button onclick="pauseRecording('${url}')"><i class="fas fa-pause"></i></button>
+                <button onclick="stopPlayback('${url}')"><i class="fas fa-stop"></i></button>
+            </div>
+        `;
+
+        document.getElementById('recordings-list').appendChild(listItem);
+    }
+
+    window.playRecording = function (url) {
+        const recordings = document.querySelectorAll('video');
+        recordings.forEach(recording => recording.pause());
+
+        const modal = document.createElement('div');
+        modal.classList.add('modal');
+        modal.innerHTML = `<video src="${url}" controls autoplay></video>`;
+
+        modal.onclick = function () {
+            modal.remove();
+        };
+
+        document.body.appendChild(modal);
+    };
+
+    window.pauseRecording = function (url) {
+        const recordings = document.querySelectorAll(`video[src="${url}"]`);
+        recordings.forEach(recording => recording.pause());
+    };
+
+    window.stopPlayback = function (url) {
+        const recordings = document.querySelectorAll(`video[src="${url}"]`);
+        recordings.forEach(recording => {
             recording.pause();
             recording.currentTime = 0;
-        }
+        });
+    };
+});
+
+
+
+
+
+
+
+
+
+
+
+
+//SECTION MUSIC
+
+// Global variables
+let apiKey = 'AIzaSyDgZ0CcQfoabcpjnQoLM7QZFWF8FodjkUk';
+let musicList = []; // Array to store fetched music data
+let currentVideoIndex = 0; // Index of the currently playing video
+
+// Function to fetch music based on the selected category
+function fetchMusic(category) {
+    const maxResults = 10; // Number of results to fetch
+
+    let searchQuery = 'music'; // Default search query
+    switch (category) {
+        case 'recentlyPlayed':
+            // Implement logic to fetch recently played music (if available)
+            // For demonstration, fetching random music for now
+            searchQuery = 'music'; 
+            break;
+        case 'bongo':
+            searchQuery = 'bongo music'; // Example placeholder for Bongo
+            break;
+        case 'hiphop':
+            searchQuery = 'hip hop music'; // Example placeholder for Hip-hop
+            break;
+        case 'rnb':
+            searchQuery = 'rnb music'; // Example placeholder for RnB
+            break;
+        case 'gospel':
+            searchQuery = 'gospel music'; // Example placeholder for Gospel
+            break;
+        case 'live':
+            searchQuery = 'live music'; // Example placeholder for Live
+            break;
+        case 'dancehall':
+            searchQuery = 'dancehall music'; // Example placeholder for Dancehall
+            break;
+        case 'reggae':
+            searchQuery = 'reggae music'; // Example placeholder for Reggae
+            break;
+        case 'afrobeats':
+            searchQuery = 'afrobeats music'; // Example placeholder for Afrobeats
+            break;
+        case 'countryMusic':
+            searchQuery = 'country music'; // Example placeholder for Country Music
+            break;
+        case 'riddim':
+            searchQuery = 'riddim music'; // Example placeholder for Riddim
+            break;
+        case 'mixes':
+            searchQuery = 'music mixes'; // Example placeholder for Mixes
+            break;
+        default:
+            break;
+    }
+
+    fetch(`https://www.googleapis.com/youtube/v3/search?key=${apiKey}&part=snippet&type=video&q=${searchQuery}&maxResults=${maxResults}`)
+        .then(response => response.json())
+        .then(data => {
+            musicList = data.items;
+            displayMusicList();
+        })
+        .catch(error => console.error('Error fetching music data', error));
+}
+
+// Function to display music list
+function displayMusicList() {
+    const musicListContainer = document.getElementById('musicList');
+    musicListContainer.innerHTML = ''; // Clear previous content
+
+    musicList.forEach((item, index) => {
+        const videoId = item.id.videoId;
+        const title = item.snippet.title;
+        const thumbnail = item.snippet.thumbnails.default.url;
+
+        // Create HTML elements for each music item
+        const musicItem = document.createElement('div');
+        musicItem.classList.add('music-item');
+        musicItem.innerHTML = `
+            <img src="${thumbnail}" alt="${title}">
+            <div class="music-info">
+                <h3>${title}</h3>
+                <div class="music-actions">
+                    <button class="play-button" data-video-id="${videoId}" data-index="${index}">Play</button>
+                    <button class="download-button" data-video-id="${videoId}">Download</button>
+                </div>
+            </div>
+        `;
+        musicListContainer.appendChild(musicItem);
+    });
+
+    // Show the music list container
+    musicListContainer.classList.remove('hidden');
+
+    // Add event listeners to play buttons
+    const playButtons = document.querySelectorAll('.play-button');
+    playButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const videoId = button.getAttribute('data-video-id');
+            const index = parseInt(button.getAttribute('data-index'));
+            playMusic(videoId, index);
+        });
+    });
+
+    // Add event listeners to download buttons
+    const downloadButtons = document.querySelectorAll('.download-button');
+    downloadButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const videoId = button.getAttribute('data-video-id');
+            downloadMusic(videoId);
+        });
+    });
+
+    // Add hover effects and animations
+    const musicItems = document.querySelectorAll('.music-item');
+    musicItems.forEach(item => {
+        item.addEventListener('mouseover', () => {
+            item.classList.add('hovered');
+        });
+        item.addEventListener('mouseout', () => {
+            item.classList.remove('hovered');
+        });
     });
 }
 
-// Function to format duration
-function formatDuration(blob) {
-    const duration = new Date(null);
-    duration.setSeconds(blob.duration);
-    return duration.toISOString().substr(11, 8);
+// Function to play music
+function playMusic(videoId, index) {
+    const musicPlayer = document.getElementById('musicPlayer');
+    musicPlayer.src = `https://www.youtube.com/embed/${videoId}`;
+
+    // Update current video index
+    currentVideoIndex = index;
+
+    // Show music player container
+    const musicPlayerContainer = document.getElementById('musicPlayerContainer');
+    musicPlayerContainer.classList.remove('hidden');
+
+    // Scroll to the music player container
+    musicPlayerContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Automatically play the music
+    musicPlayer.play();
+
+    // Play next music automatically when current ends
+    musicPlayer.addEventListener('ended', playNextMusic);
 }
 
-// Function to handle camera stream errors
-function handleCameraError(error) {
-    console.error('Camera error:', error);
-    document.getElementById('recording-status').innerText = 'Camera not available. Recording audio only...';
-    startAudioRecording(); // Start audio recording if video recording fails
+// Function to play next music
+function playNextMusic() {
+    currentVideoIndex = (currentVideoIndex + 1) % musicList.length;
+    const nextVideoId = musicList[currentVideoIndex].id.videoId;
+    playMusic(nextVideoId, currentVideoIndex);
 }
 
+// Function to download music
+function downloadMusic(videoId) {
+    const qualitySelect = document.getElementById('qualitySelect');
+    qualitySelect.innerHTML = `
+        <option value="low">Low Quality</option>
+        <option value="medium">Medium Quality</option>
+        <option value="high">High Quality</option>
+    `;
+    const downloadButton = document.getElementById('downloadButton');
+    downloadButton.setAttribute('data-video-id', videoId);
 
+    const musicSettings = document.querySelector('.music-settings');
+    musicSettings.classList.remove('hidden');
+}
 
+// Initial fetch for default category (recentlyPlayed)
+fetchMusic('recentlyPlayed');
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Event listener for category buttons
+const categoryButtons = document.querySelectorAll('.category-button');
+categoryButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const category = button.getAttribute('data-category');
+        fetchMusic(category);
+    });
+});
